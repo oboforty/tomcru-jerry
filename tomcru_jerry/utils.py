@@ -2,7 +2,7 @@ import os
 from importlib import import_module
 
 
-def import_from_dir(ctx, class_suffix, module_path, path=None):
+def import_from_dir(ctx, class_suffix, module_path, path=None, case_insensitive=False):
     """
     Loads EME handlers
     :param ctx: parent app class instance
@@ -31,37 +31,51 @@ def import_from_dir(ctx, class_suffix, module_path, path=None):
         # instantiate class
         handler_class = getattr(module, module_name)
         handler = handler_class(*ctx) if isinstance(ctx, tuple) else handler_class(ctx)
-        handlers[module_name[:CL]] = handler
+
+        handler_name = module_name[:CL]
+        if case_insensitive:
+            handler_name = handler_name.lower()
+
+        handlers[handler_name] = handler
 
     return handlers
 
 
 def get_dict_hierarchy(conf: dict, opts, default=None, cast=None):
-    if '.' not in opts:
+    parts = opts.split('.')
+    cont = conf
 
-        if cast is not None:
-            return {k: cast(val) for k, val in conf[opts].items()}
-        else:
-            return conf.get(opts, default)
-
-    main, opt = opts.split('.')
-
-    if main not in conf:
+    try:
+        for part in parts[:-1]:
+            cont = cont[part]
+    except Exception as e:
         return default
 
-    val = conf[main].get(opt)
+    last_opt = parts[-1]
+    return cont.get(last_opt, default)
 
-    if opt is None:
-        if cast is bool:
-            return False
-        elif cast is float or cast is int:
-            return 0
-
-        return default
-
-    if val is None:
-        return default
-
-    if cast is not None:
-        return cast(val)
-    return val
+    # if '.' not in opts:
+    #
+    #     if cast is not None:
+    #         return {k: cast(val) for k, val in conf[opts].items()}
+    #     else:
+    #
+    # if main not in conf:
+    #     return default
+    #
+    # val = conf[main].get(opt)
+    #
+    # if opt is None:
+    #     if cast is bool:
+    #         return False
+    #     elif cast is float or cast is int:
+    #         return 0
+    #
+    #     return default
+    #
+    # if val is None:
+    #     return default
+    #
+    # if cast is not None:
+    #     return cast(val)
+    # return val

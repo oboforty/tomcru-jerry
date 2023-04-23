@@ -71,9 +71,9 @@ def add_controllers(app: Flask, controllers: dict, index=None, debug_len=20):
                 #     route = "/" + controller.route + "/" + action_name
 
                 # modify route with uri's input params:
-                sig = inspect.signature(method)
+                sig = inspect.signature(method_fn)
                 for par_name, par in sig.parameters.items():
-                    if par_name in ['args', 'kwargs']:
+                    if par_name in ('args', 'kwargs'):
                         continue
 
                     if par.annotation != inspect._empty and par.annotation is not str:
@@ -92,13 +92,16 @@ def add_controllers(app: Flask, controllers: dict, index=None, debug_len=20):
             #     continue
 
             for route in routes:
-                route = route.replace('//', '/')
+                add_endpoint(app, route, endpoint_id, method_fn)
 
-                sp = route.split(' ')
-                if len(sp) == 1:
-                    method = 'GET'
-                else:
-                    method, route = sp
+def add_endpoint(app, route, endpoint_id, method_fn):
+    route = route.replace('//', '/')
 
-                #print('??', method, route, endpoint_id)
-                app.add_url_rule(route, endpoint_id, method_fn, methods=[method])
+    sp = route.split(' ')
+    if len(sp) == 1:
+        method = 'GET'
+    else:
+        method, route = sp
+
+    # print('??', method, route, endpoint_id)
+    app.add_url_rule(route, endpoint_id, method_fn, methods=[method])

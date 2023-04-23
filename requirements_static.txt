@@ -1,0 +1,6 @@
+flask
+pynliner
+beautifulsoup4
+htmlmin
+jinja2
+#inflect
