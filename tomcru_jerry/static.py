@@ -15,8 +15,8 @@ class RegexConverter(BaseConverter):
         self.regex = items[0]
 
 
-class EmeStaticWebsite:
-    def __init__(self, index, path):
+class StaticWebsite:
+    def __init__(self, index, path, static_files):
 
         template_folder, static_folder = self.get_paths(path)
 
@@ -27,6 +27,7 @@ class EmeStaticWebsite:
         self.pyl: pynliner.Pynliner = None
         self.args = {}
         self.kept_styles = defaultdict(list)
+        self.static_files = static_files
 
     def get_paths(self, path='webapp'):
         template_folder = os.path.join(path, 'templates')
@@ -66,7 +67,8 @@ class EmeStaticWebsite:
         # previews email in Flask (also uses Jinja2)
         self.app = Flask('', static_folder=self.static_folder, template_folder=self.template_folder)
         #self.app.url_map.converters['regex'] = RegexConverter
-        pattern = re.compile(r'(img/|js/|css/|fonts/).*')
+
+        pattern = re.compile('('+'|'.join(self.static_files)+'/).*')
 
         @self.app.route('/', defaults={'path': ''})
         @self.app.route('/<path:path>')
@@ -84,7 +86,8 @@ class EmeStaticWebsite:
     def run(self, *args, **kwargs):
         return self.app.run(*args, **kwargs)
 
-class Ememail(EmeStaticWebsite):
+
+class Ememail(StaticWebsite):
     def __init__(self, *args, **kwargs):
         super(Ememail, self).__init__(*args, **kwargs)
 

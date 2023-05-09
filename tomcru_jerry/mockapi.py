@@ -61,47 +61,52 @@ def transform_response(resp_tpl: dict, req: dict):
     p = re.compile(r'\{([^}]*)}')
 
     for container in ['body', 'headers']:
-        for key, transform in resp_tpl[container].items():
-            if isinstance(transform, str):
-                # subtitute request -> response transformations
-                groups = p.findall(transform)
+        content = resp_tpl[container]
 
-                if groups:
-                    res = transform
+        if isinstance(content, dict):
+            for key, transform in content.items():
+                if isinstance(transform, str):
+                    # subtitute request -> response transformations
+                    groups = p.findall(transform)
 
-                    for group in groups:
-                        to_find = str(group)
-                        if 'headers' == to_find.split('.')[0]:
-                            to_find = to_find.lower()
+                    if groups:
+                        res = transform
 
-                        if 'access_token' == to_find:
-                            try:
-                                _bearer, token = req['headers']['authorization'].split(' ')
+                        for group in groups:
+                            to_find = str(group)
+                            if 'headers' == to_find.split('.')[0]:
+                                to_find = to_find.lower()
 
-                                assert _bearer.lower() == 'bearer'
-                                if not token:
-                                    raise Exception("")
-                            except:
-                                return {"body": {}}, 403
+                            if 'access_token' == to_find:
+                                try:
+                                    _bearer, token = req['headers']['authorization'].split(' ')
 
-                            substitute = token
-                        elif 'url' == to_find:
-                            substitute = str(request.url_root)
-                        else:
-                            substitute = get_dict_hierarchy(req, to_find)
-                            #substitute = req.get(to_find)
+                                    assert _bearer.lower() == 'bearer'
+                                    if not token:
+                                        raise Exception("")
+                                except:
+                                    return {"body": {}}, 403
 
-                        if f'{{{group}}}' == transform:
-                            # replace as-is (keeps type)
-                            if substitute is not None:
-                                res = substitute
-                                break
-                        else:
-                            # string template replace
-                            if substitute is not None:
-                                res = res.replace(f'{{{group}}}', str(substitute))
+                                substitute = token
+                            elif 'url' == to_find:
+                                substitute = str(request.url_root)
+                            else:
+                                substitute = get_dict_hierarchy(req, to_find)
+                                #substitute = req.get(to_find)
 
-                    if res is not None:
-                        resp[container][key] = res
+                            if f'{{{group}}}' == transform:
+                                # replace as-is (keeps type)
+                                if substitute is not None:
+                                    res = substitute
+                                    break
+                            else:
+                                # string template replace
+                                if substitute is not None:
+                                    res = res.replace(f'{{{group}}}', str(substitute))
+
+                        if res is not None:
+                            resp[container][key] = res
+        else:
+            resp[container] = content
 
     return resp, status

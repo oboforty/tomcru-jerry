@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tomcru-jerry"
-version = "0.1.0"
+version = "0.1.1"
 description = "General purpose web library"
 authors = ["Rajmund Csombordi <rajmund.csombordi@hotmail.com>"]
 readme = "README.md"
