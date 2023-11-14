@@ -17,7 +17,7 @@ def preset_endpoint(app: Flask, new_url, endpoint_id):
         new_url = f'{method_http} {new_url}'
 
     # force the GET keyword into the endpoint
-    controller, method_fn = endpoint_id.split(':')
+    # controller, method_fn = endpoint_id.split(':')
     #method_http.lower()}_{method_fn
     #if method_fn.startswith()
 
@@ -104,4 +104,4 @@ def add_endpoint(app, route, endpoint_id, method_fn):
         method, route = sp
 
     # print('??', method, route, endpoint_id)
-    app.add_url_rule(route, endpoint_id, method_fn, methods=[method])
+    app.add_url_rule(route, endpoint_id, method_fn, methods=[method], strict_slashes=False)

@@ -15,8 +15,9 @@ class MockedController:
 
         for url, response in responses.items():
             ep_id = response.get('endpoint_id', str(uuid.uuid4()))
+            ep_id = f'{app.name}:{ep_id}'
 
-            preset_endpoint(app, url, f'{app.name}.{flask_endpoint}' if app.name else flask_endpoint)
+            preset_endpoint(app, url, ep_id)
             self.resp_tpls[ep_id] = response
 
             # method, route = endpoint.split(' ') if ' ' in endpoint else ['GET', endpoint]
